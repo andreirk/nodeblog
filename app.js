@@ -13,7 +13,7 @@ var blogSchema = new mongoose.Schema({
     title: String,
     image: String,
     body:  String,
-    created: {type:Date, dafault: Date.now}
+    created: {type:Date, default: Date.now}
 });
 
 var Blog = mongoose.model('Blog', blogSchema);
@@ -48,8 +48,18 @@ app.post('/blogs', function(req,res){
            res.redirect('/blogs');
        }
     });
-  
 });
+
+// show Route
+app.get('/blogs/:id', function(req, res) {
+    Blog.findById(req.params.id, function(err, foundBlog){
+        if(err){
+            res.redirect('/blogs');
+        } else {
+            res.render('show', {blog: foundBlog});
+        }
+    })
+})
 
 
 

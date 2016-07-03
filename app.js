@@ -2,12 +2,15 @@ var express = require("express"),
     app = express(),
     bodyParser = require("body-parser"),
     methodOverride = require("method-override"),
+    expressSanitizer = require("express-sanitizer"),
     mongoose = require("mongoose"); 
     
+// APP CONFIG    
 mongoose.connect('mongodb://' + process.env.IP + '/nodeblog');
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({extended:true}));
+app.use(expressSanitizer());
 app.use(methodOverride('_method'));
 
 
@@ -26,6 +29,7 @@ app.get('/', function(req,res){
     res.redirect('/blogs');
 });
 
+// INDEX route
 app.get('/blogs', function(req,res){
     Blog.find({}, function(err, blogs){
        if(err){
@@ -37,11 +41,14 @@ app.get('/blogs', function(req,res){
   
 });
 
+// NEW route
 app.get('/blogs/new', function(req, res) {
     res.render('new');
 })
 
+// CREATE route
 app.post('/blogs', function(req,res){
+    req.body.blog.body = req.sanitize(req.body.blog.body);
     Blog.create(req.body.blog, function(err, NewBlog){
        if(err){
            res.render('new');
@@ -77,6 +84,7 @@ app.get('/blogs/:id/edit', function(req, res) {
 
 // UPDATE route
 app.put('/blogs/:id', function(req, res){
+    req.body.blog.body = req.sanitize(req.body.blog.body);
     Blog.findByIdAndUpdate(req.params.id, req.body.blog, function(err,updatedBlog){
         if(err){
             res.redirect('/blogs');
